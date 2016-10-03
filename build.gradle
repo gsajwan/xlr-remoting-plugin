@@ -1,15 +1,55 @@
+/* Gradle plugins used in this project */
+buildscript {
+  repositories {
+    maven {
+      credentials {
+        username nexusUserName
+        password nexusPassword
+      }
+      url "${nexusBaseUrl}/repositories/releases/"
+    }
+  }
+  dependencies {
+    classpath 'com.xebialabs.gradle.plugins.xlrelease:gradle-xl-release-plugin-plugin:0.0.2-rc.1'
+    classpath 'net.researchgate:gradle-release:2.3.4'
+  }
+}
+
+plugins {
+  id 'java'
+  id 'com.moowork.node' version '0.12'
+}
+apply plugin: 'com.xebialabs.xl-release.plugin'
 apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'eclipse'
-apply plugin: 'maven'
+apply plugin: 'net.researchgate.release'
 
-repositories {
-    mavenLocal()
-    mavenCentral()
-    maven {
-        url "https://dist.xebialabs.com/public/maven2/"
-    }
+group 'com.xebialabs.xlrelease.plugins'
+
+
+afterReleaseBuild.dependsOn uploadArchives
+// Uncomment following line if your plugin depends on additional libraries
+dependencies {
+  xlReleaseAdditionalClasspath('com.xebialabs.deployit:udm-plugin-api:2015.2.13')
 }
 
-defaultTasks 'build'
-version='0.0.1'
+release {
+  tagTemplate = 'xlr-remoting-plugin-$version'
+  preTagCommitMessage = 'Released xlr remoting plugin'
+  tagCommitMessage = 'Tag for xlr-remoting-plugin'
+  newVersionCommitMessage = 'Set development version to '
+}
+
+uploadArchives {
+  repositories {
+    maven {
+      credentials {
+        username nexusUserName
+        password nexusPassword
+      }
+      url "${nexusBaseUrl}/repositories/releases/"
+    }
+  }
+}
+
