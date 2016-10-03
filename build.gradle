@@ -27,8 +27,9 @@ apply plugin: 'net.researchgate.release'
 
 group 'com.xebialabs.xlrelease.plugins'
 
-
+project.ext.set('release.useAutomaticVersion', 'true')
 afterReleaseBuild.dependsOn uploadArchives
+
 // Uncomment following line if your plugin depends on additional libraries
 dependencies {
   xlReleaseAdditionalClasspath('com.xebialabs.deployit:udm-plugin-api:2015.2.13')
@@ -52,4 +53,3 @@ uploadArchives {
     }
   }
 }
-
