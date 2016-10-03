@@ -1,0 +1,160 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<synthetic xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns="http://www.xebialabs.com/deployit/synthetic"
+           xsi:schemaLocation="http://www.xebialabs.com/deployit/synthetic synthetic.xsd">
+
+    <type type="host.Machine" extends="xlrelease.Configuration" virtual="true">
+        <!-- Overthere connection options -->
+        <property name="temporaryDirectoryPath" category="input" required="false"
+                  description="Directory in which temporary files are stored. This directory will be cleaned up when the connection is closed."/>
+        <property name="jumpstation" category="input" kind="ci" required="false" referenced-type="remoteScript.Jumpstation"
+                  description="Jumpstation that should be used to reach this host."/>
+        <property name="tmpDeleteOnDisconnect" category="input" kind="boolean" required="false" default="true" hidden="true"
+                  description="If true, delete the temporary connection directory when the connection is closed"/>
+        <property name="tmpFileCreationRetries" category="input" kind="integer" default="1000" hidden="true"
+                  description="Number of times Overthere attempts to create a temporary file with a unique name"/>
+        <property name="connectionTimeoutMillis" category="input" kind="integer" default="120000" hidden="true"
+                  description="Number of milliseconds Overthere waits for a connection to a remote host to be established"/>
+    </type>
+
+    <type type="host.Ssh" extends="host.Machine" virtual="true">
+        <property name="protocol" hidden="true" default="ssh" />
+
+        <property name="address" category="input" kind="string" required="true"
+                  description="Address of the host"/>
+        <property name="port" category="input" kind="integer" required="true" default="22"
+                  description="Port on which the SSH server runs"/>
+        <property name="username" category="input" kind="string" required="true"
+                  description="Username to connect with"/>
+        <property name="password" category="input" kind="string" required="false" password="true"
+                  description="Password to use for authentication"/>
+        <property name="privateKey" category="input" kind="string" required="false"
+                  description="Private key to use for authentication"/>
+        <property name="privateKeyFile" category="input" kind="string" required="false"
+                  description="Private key file to use for authentication"/>
+        <property name="passphrase" category="input" kind="string" required="false" password="true"
+                  description="Optional passphrase for the private key in the private key file"/>
+
+        <property name="allocateDefaultPty" category="input" kind="boolean" required="false" default="false" hidden="true"
+                  description="If true, a default PTY (dummy:80:24:0:0) is allocated when executing a command"/>
+        <property name="allocatePty" category="input" kind="string" required="false" hidden="true"
+                  description="Specification for the PTY to be allocated when executing a command. The format is TERM:COLS:ROWS:WIDTH:HEIGHT, e.g. xterm:80:24:0:0"/>
+        <property name="interactiveKeyboardAuthRegex" category="input" kind="string" default=".*Password:[ ]?" hidden="true"
+                  description="Regular expression to look for in keyboard-interactive authentication before sending the password"/>
+
+        <property name="sudoUsername" category="input" kind="string" required="false"
+                  label="SUDO username" description="Username to sudo to when accessing files or executing commands"/>
+        <property name="sudoCommandPrefix" category="input" kind="string" default="sudo -u {0}" hidden="true"
+                  description="Sudo command to prefix to the original command. The placeholder {0} is replaced with the sudoUsername"/>
+        <property name="sudoQuoteCommand" category="input" kind="boolean" required="false" default="false" hidden="true"
+                  description="If true, the original command is quoted when it is prefixed with sudoCommandPrefix"/>
+        <property name="sudoPreserveAttributesOnCopyFromTempFile" category="input" kind="boolean" required="false" default="true" hidden="true"
+                  description="If true, files are copied from the connection temporary directory using the -p flag to the cp command"/>
+        <property name="sudoPreserveAttributesOnCopyToTempFile" category="input" kind="boolean" required="false" default="true" hidden="true"
+                  description="If true, files are copied to the connection temporary directory using the -p flag to the cp command"/>
+        <property name="sudoPasswordPromptRegex" category="input" kind="string" default=".*[Pp]assword.*:" hidden="true"
+                  description="Regular expression to look for in interactive sudo before sending the password"/>
+        <property name="sudoOverrideUmask" category="input" kind="boolean" required="false" default="true" hidden="true"
+                  description="If true, permissions are explicitly changed with chmod -R go+rX after uploading a file or directory"/>
+
+        <property name="suUsername" category="input" kind="string" required="false"
+                  label="SU username" description="Username to su to when accessing files or executing commands"/>
+        <property name="suPassword" category="input" kind="string" required="false" password="true"
+                  label="SU password" description="Password of user to su to when accessing files or executing commands"/>
+        <property name="suCommandPrefix" category="input" kind="string" default="su - {0} -c" hidden="true"
+                  description="Su command to prefix to the original command. The placeholder {0} is replaced with the sudoUsername"/>
+        <property name="suQuoteCommand" category="input" kind="boolean" required="false" default="true" hidden="true"
+                  description="If true, the original command is quoted when it is prefixed with suCommandPrefix"/>
+        <property name="suPreserveAttributesOnCopyFromTempFile" category="input" kind="boolean" required="false" default="true" hidden="true"
+                  description="If true, files are copied from the connection temporary directory using the -p flag to the cp command"/>
+        <property name="suPreserveAttributesOnCopyToTempFile" category="input" kind="boolean" required="false" default="true" hidden="true"
+                  description="If true, files are copied to the connection temporary directory using the -p flag to the cp command"/>
+        <property name="suPasswordPromptRegex" category="input" kind="string" default=".*[Pp]assword.*:" hidden="true"
+                  description="Regular expression to look for before sending the password"/>
+        <property name="suOverrideUmask" category="input" kind="boolean" required="false" default="true" hidden="true"
+                  description="If true, permissions are explicitly changed with chmod -R go+rX after uploading a file or directory"/>
+    </type>
+
+    <type type="host.Unix" extends="host.Ssh" label="Unix Host" description="A Unix host">
+        <property name="os" kind="enum" enum-class="com.xebialabs.overthere.OperatingSystemFamily" hidden="true" default="UNIX" />
+        <property name="connectionType" kind="enum" enum-class="com.xebialabs.overthere.ssh.SshConnectionType" required="true" default="SUDO" description="Type of SSH connection to create."/>
+    </type>
+
+    <type type="host.WindowsSsh" extends="host.Ssh" label="Windows (SSH) Host" description="A Windows host with SSH">
+        <property name="os" kind="enum" enum-class="com.xebialabs.overthere.OperatingSystemFamily" hidden="true" default="WINDOWS" />
+        <property name="connectionType" category="input" kind="enum" default="SFTP_CYGWIN" label="Connection type"
+                  description="Type of SSH connection to create (SFTP_CYGWIN, SFTP_WINSSHD)">
+            <enum-values>
+                <value>SFTP_CYGWIN</value>
+                <value>SFTP_WINSSHD</value>
+            </enum-values>
+        </property>
+    </type>
+
+    <type type="host.Cifs" extends="host.Machine" virtual="true">
+        <property name="protocol" hidden="true" default="cifs" />
+
+        <property name="address" category="input" kind="string" required="true"
+                  description="Address of the host"/>
+        <property name="port" category="input" kind="integer" required="false"
+                  description="Port on which the Telnet or WinRM server runs"/>
+        <property name="username" category="input" kind="string" required="true"
+                  description="Username to connect with" />
+        <property name="password" category="input" kind="string" required="true" password="true"
+                  description="Password to use for authentication"/>
+
+        <property name="cifsPort" category="input" kind="integer" required="false" default="445"
+                  label="CIFS Port" description="Port on which the CIFS server runs"/>
+        <property name="pathShareMappings" category="input" kind="map_string_string" required="false"
+                  label="Windows path to Windows share mappings"
+                  description="Mapping from Windows paths to Windows share names, e.g. C:\IBM\WebSphere -> WebSphereShare"/>
+
+        <property name="winrmEnableHttps" category="input" kind="boolean" required="false" default="false"
+                  label="Enable HTTPS for WinRM" description="Enable SSL communication to the WinRM server"/>
+        <!-- Should've been called winrmTimeout -->
+        <property name="timeout" category="input" kind="string" default="PT60.000S"
+                  description="Timeout to use for WinRM messages in XML schema duration format"/>
+        <property name="winrsAllowDelegate" label="Allow credential delegation" category="input" kind="boolean" default="false" required="false"
+                  description="Specifies that the user's credentials can be used to access a remote share, for example, found on a different machine than the target endpoint (WINRM_NATIVE only)" />
+
+        <property name="winrmContext" category="input" kind="string" default="/wsman" hidden="true"
+                  description="Context used by the WinRM server (WINRM only)"/>
+        <property name="winrmEnvelopSize" category="input" kind="integer" default="153600" hidden="true"
+                  description="Envelop size for WinRM messages (WINRM only)"/>
+        <property name="winrmLocale" category="input" kind="string" default="en-US" hidden="true"
+                  description="Locale to use for WinRM messages (WINRM only)"/>
+        <property name="winrmHttpsCertificateTrustStrategy" category="input" kind="enum"
+                  enum-class="com.xebialabs.overthere.cifs.WinrmHttpsCertificateTrustStrategy"
+                  default="STRICT" hidden="true" description="HTTPS certifiacte trust strategy for WinRM over HTTPS (WINRM_INTERNAL only)"/>
+        <property name="winrmHttpsHostnameVerificationStrategy" category="input" kind="enum"
+                  enum-class="com.xebialabs.overthere.cifs.WinrmHttpsHostnameVerificationStrategy"
+                  default="STRICT" hidden="true" description="HTTPS host name verification strategy for WinRM over HTTPS (WINRM_INTERNAL only)"/>
+        <property name="winrmKerberosDebug" category="input" kind="boolean" default="false" hidden="true" required="false"
+                  description="Enable Kerberos debug messages (WINRM only)"/>
+        <property name="winrmKerberosAddPortToSpn" category="input" kind="boolean" default="false" hidden="true" required="false"
+                  description="Add the port number (e.g. 5985) to the service principal name (SPN) for which a Kerberos ticket is requested (WINRM_INTERNAL only)" />
+        <property name="winrmKerberosUseHttpSpn" category="input" kind="boolean" default="false" hidden="true" required="false"
+                  description="Use the HTTP protocol in the service principal name (SPN) for which a Kerberos ticket is requested, instead of the default WSMAN protocol (WINRM_INTERNAL only)" />
+
+        <property name="winrsCompression" category="input" kind="boolean" default="false" hidden="true" required="false"
+                  description="Turn on compression. Older installations on remote machines may not support compression so it is off by default (WINRM_NATIVE only)" />
+        <property name="winrsNoecho" category="input" kind="boolean" default="false" hidden="true" required="false"
+                  description="Specifies that echo should be disabled. This may be necessary to ensure that user's answers to remote prompts are not displayed locally (WINRM_NATIVE only)" />
+        <property name="winrsNoprofile" category="input" kind="boolean" default="false" hidden="true" required="false"
+                  description="Specifies that the user's profile should not be loaded. By default the server will attempt to load the user profile. If the remote user is not a local administrator on the target system then this option will be required (the default willresult in error) (WINRM_NATIVE only)" />
+        <property name="winrsUnencrypted" category="input" kind="boolean" default="false" hidden="true" required="false"
+                  description="Disable encryption. Requires the remote host to have been configured to allow that (WINRM_NATIVE only)" />
+    </type>
+
+    <type type="host.Windows" extends="host.Cifs" label="Windows Host" description="A Windows host">
+        <property name="os" category="input" kind="enum" enum-class="com.xebialabs.overthere.OperatingSystemFamily" default="WINDOWS" hidden="true" />
+        <property name="connectionType" category="input" kind="enum" default="WINRM_INTERNAL" label="Connection type"
+                  description="Type of CIFS/Telnet/WinRM connection to create (TELNET, WINRM_INTERNAL, WINRM_NATIVE)">
+            <enum-values>
+                <value>TELNET</value>
+                <value>WINRM_INTERNAL</value>
+                <value>WINRM_NATIVE</value>
+            </enum-values>
+        </property>
+    </type>
+</synthetic>
