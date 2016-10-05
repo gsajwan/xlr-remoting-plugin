@@ -11,7 +11,7 @@ buildscript {
   }
   dependencies {
     classpath 'com.xebialabs.gradle.plugins.xlrelease:gradle-xl-release-plugin-plugin:0.0.2-rc.1'
-    classpath 'net.researchgate:gradle-release:2.3.4'
+    classpath "com.xebialabs.gradle.plugins:gradle-xl-release-plugin:1.1.2"
   }
 }
 
@@ -23,24 +23,21 @@ apply plugin: 'com.xebialabs.xl-release.plugin'
 apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'eclipse'
-apply plugin: 'net.researchgate.release'
+//apply plugin: 'org.ajoberstar.release-opinion'
+apply plugin: 'xebialabs.release'
 
 group 'com.xebialabs.xlrelease.plugins'
-
-project.ext.set('release.useAutomaticVersion', 'true')
-afterReleaseBuild.dependsOn uploadArchives
-
+// afterReleaseBuild.dependsOn uploadArchives
 // Uncomment following line if your plugin depends on additional libraries
 dependencies {
   xlReleaseAdditionalClasspath('com.xebialabs.deployit:udm-plugin-api:2015.2.13')
 }
 
 release {
-  tagTemplate = 'xlr-remoting-plugin-$version'
-  preTagCommitMessage = 'Released xlr remoting plugin'
-  tagCommitMessage = 'Tag for xlr-remoting-plugin'
-  newVersionCommitMessage = 'Set development version to '
+  grgit = org.ajoberstar.grgit.Grgit.open()
 }
+tasks.release.dependsOn tasks.clean
+tasks.prepare.mustRunAfter tasks.clean
 
 uploadArchives {
   repositories {
